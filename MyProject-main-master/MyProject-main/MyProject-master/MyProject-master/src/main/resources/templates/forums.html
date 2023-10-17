@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap}" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="navbar">
+            <nav class="navigation hide" id="navigation">
+                <span class="close-icon" id="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="/forums">Forums</a></li>
+                    <li class="nav-item"><a href="/posts?keyword=">Posts</a></li>
+                </ul>
+            </nav>
+            <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
+            <div class="brand">My Forum</div>
+            <div class="user-profile">
+                <i class="fa fa-user" style="color: #D3D3D3"></i>
+                <a th:href="@{'/user?id=' + ${id}}" th:text="${currUserName}">
+
+                </a>
+            </div>
+        </div>
+        <div class="search-box">
+            <div>
+                <input type="text" name="q" id="search-input" placeholder="Search ...">
+                <button id="search-button"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+
+
+        <div class="subforum">
+            <div class="subforum-title">
+                <h1>Recent posts</h1>
+            </div>
+            <div id="mostRecentSubforumContainer"></div>
+        </div>
+
+        <div class="subforum">
+            <div class="subforum-title">
+                <h1>Most viewed posts</h1>
+            </div>
+            <div id="mostViewedSubforumContainer"></div>
+
+
+        </div>
+        <!---->
+    </div>
+    <div class="note">
+        <span><i class="fa fa-pencil-square-o"></i>&nbsp; Create Post</span>&nbsp;&nbsp;&nbsp;<a href="/posts/create"><i class="fa fa-share-square"></i></a><br>
+        <span><i class="fa fa-book"></i>&nbsp; View My Posts</span>&nbsp;&nbsp;&nbsp;<a th:href="@{/posts/user(id=${id})}"><i class="fa fa-share-square"></i></a><br>
+    </div>
+
+
+    <script th:inline="javascript">
+        //NavBar
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+
+        // Định nghĩa hàm xử lý tìm kiếm
+        function handleSearch() {
+            // Lấy giá trị từ khóa tìm kiếm và loại tìm kiếm đã chọn
+            const keyword = searchInput.value;
+
+
+            // Hiển thị giá trị tìm kiếm trong console
+            console.log('Keyword:', keyword);
+
+            window.location.href = "posts?keyword=" + encodeURIComponent(keyword);
+
+            searchInput.value = '';
+        }
+
+        // Gán hàm xử lý sự kiện khi người dùng nhấn vào nút tìm kiếm
+        searchButton.addEventListener('click', handleSearch);
+        function hideIconBar(){
+            var iconBar = document.getElementById("iconBar");
+            var navigation = document.getElementById("navigation");
+            iconBar.setAttribute("style", "display:none;");
+            navigation.classList.remove("hide");
+        }
+
+        function showIconBar(){
+            var iconBar = document.getElementById("iconBar");
+            var navigation = document.getElementById("navigation");
+            iconBar.setAttribute("style", "display:block;");
+            navigation.classList.add("hide");
+        }
+        var listMostView = [[${topViewedPosts}]];
+        var listMostRecent = [[${mostRecentPosts}]];
+        function generateMostRecentSubforums() {
+            var subforumContainer = document.getElementById('mostRecentSubforumContainer');
+
+            listMostRecent.forEach(function (post) {
+                var subforumRow = document.createElement('div');
+                subforumRow.className = 'subforum-row';
+
+                var subforumIcon = document.createElement('div');
+                subforumIcon.className = 'subforum-icon subforum-column center';
+                subforumIcon.innerHTML = '<i class="fa fa-car center"></i>';
+
+                var subforumDescription = document.createElement('div');
+                subforumDescription.className = 'subforum-description subforum-column';
+                subforumDescription.innerHTML = '<h4><a href="/details?id=' + post.postId + '">' + post.postSubject + '</a></h4>';
+
+                var subforumStats = document.createElement('div');
+                subforumStats.className = 'subforum-stats subforum-column center';
+                subforumStats.innerHTML = '<span>' + post.postReplies + ' Replies</span>';
+
+                var subforumInfo = document.createElement('div');
+                subforumInfo.className = 'subforum-info subforum-column';
+                subforumInfo.innerHTML = "<b><span>Posted by </span></b><a href='/user?id=" + post.postBy + "'>" + post.postByName + '</a> <br>' +
+                    'on <small>' + post.postDate + '</small>';
+                subforumRow.appendChild(subforumIcon);
+                subforumRow.appendChild(subforumDescription);
+                subforumRow.appendChild(subforumStats);
+                subforumRow.appendChild(subforumInfo);
+
+                subforumContainer.appendChild(subforumRow);
+
+                if (post !== listMostRecent[listMostRecent.length - 1]) {
+                    var subforumDivider = document.createElement('hr');
+                    subforumDivider.className = 'subforum-divider';
+                    subforumContainer.appendChild(subforumDivider);
+                }
+            });
+        }
+        function generateMostViewSubforums() {
+            var subforumContainer = document.getElementById('mostViewedSubforumContainer');
+
+            listMostView.forEach(function (post) {
+                var subforumRow = document.createElement('div');
+                subforumRow.className = 'subforum-row';
+
+                var subforumIcon = document.createElement('div');
+                subforumIcon.className = 'subforum-icon subforum-column center';
+                subforumIcon.innerHTML = '<i class="fa fa-car center"></i>';
+
+                var subforumDescription = document.createElement('div');
+                subforumDescription.className = 'subforum-description subforum-column';
+                subforumDescription.innerHTML = '<h4><a href="/details?id=' + post.postId + '">' + post.postSubject + '</a></h4>';
+
+                var subforumStats = document.createElement('div');
+                subforumStats.className = 'subforum-stats subforum-column center';
+                subforumStats.innerHTML = '<span>' + post.postReplies + ' Replies</span>';
+
+                var subforumInfo = document.createElement('div');
+                subforumInfo.className = 'subforum-info subforum-column';
+                subforumInfo.innerHTML = "<b><span>Posted by </span></b><a href='/user?id=" + post.postBy + "'>" + post.postByName + '</a> <br>' +
+                    'on <small>' + post.postDate + '</small>';
+                subforumRow.appendChild(subforumIcon);
+                subforumRow.appendChild(subforumDescription);
+                subforumRow.appendChild(subforumStats);
+                subforumRow.appendChild(subforumInfo);
+
+                subforumContainer.appendChild(subforumRow);
+
+                if (post !== listMostView[listMostView.length - 1]) {
+                    var subforumDivider = document.createElement('hr');
+                    subforumDivider.className = 'subforum-divider';
+                    subforumContainer.appendChild(subforumDivider);
+                }
+            });
+        }
+        generateMostRecentSubforums();
+        generateMostViewSubforums();
+
+    </script>
+</body>
+</html>

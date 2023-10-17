@@ -1,0 +1,27 @@
+# ----------------------------------------
+# Server Info
+# ----------------------------------------
+server:
+  port: 8091
+  servlet:
+    context-path: /
+  error:
+    whitelabel:
+      enabled: false
+    path: /error
+
+# ----------------------------------------
+# Spring Setting
+# ----------------------------------------
+spring:
+  application:
+    name: spring-training
+  datasource:
+    url: jdbc:mysql://localhost:3306/my_db
+    username: root
+    password: phucity315
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+

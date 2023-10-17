@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet"
+        th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css}">
+  <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+  <link th:href="@{https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap}" rel="stylesheet">
+</head>
+<body>
+<header>
+  <!--NavBar Section-->
+  <div class="navbar">
+    <nav class="navigation hide" id="navigation">
+      <span class="close-icon" id="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="/forums">Forums</a></li>
+        <li class="nav-item"><a href="/posts?keyword=">Posts</a></li>
+      </ul>
+    </nav>
+    <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
+    <div class="brand">My Forum</div>
+  </div>
+  <!--SearchBox Section-->
+  <div class="search-box">
+    <div>
+      <select name="search-type" id="search-type">
+        <option value="everything">Everything</option>
+        <option value="titles">Titles</option>
+        <option value="descriptions">Descriptions</option>
+      </select>
+      <input type="text" name="q" id="search-input" placeholder="Search ...">
+      <button id="search-button"><i class="fa fa-search"></i></button>
+    </div>
+  </div>
+</header>
+<div class="container">
+  <div class="pageContent">
+    <div class="p-body-pageContent">
+      <form th:action="@{'/update'+'/user?id=' + ${id} }" method="post" th:object="${userShown}" class="block" data-xf-init="ajax-submit" data-force-flash-message="true" onkeydown="return event.key !== 'Enter';">
+        <div class="block-container">
+          <div class="block-body" id="form-block-body">
+            <dl class="formRow formRow--button">
+              <dt>
+                <div class="formRow-labelWrapper">
+                  <label class="formRow-label">User name</label></div>
+              </dt>
+              <dd>
+                <div class="user-info" th:text="${userShown.userName}" ></div>
+              </dd>
+            </dl>
+            <dl class="formRow formRow--button">
+              <dt>
+                <div class="formRow-labelWrapper">
+                  <label class="formRow-label">Email</label></div>
+              </dt>
+              <dd>
+                <div class="user-info" th:text="${userShown.userEmail}" ></div>
+              </dd>
+            </dl>
+            <dl class="formRow formRow--input">
+              <dt>
+                <div class="formRow-labelWrapper">
+                  <label class="formRow-label">Date of birth</label></div>
+              </dt>
+              <dd>
+                <div class="user-info" th:text="${userShown.userDob}" ></div>
+                <div class="formRow-explain">Year/Month/Day</div>
+
+              </dd>
+            </dl>
+            <dl class="formRow formRow--input">
+              <dt>
+                <div class="formRow-labelWrapper">
+                  <label class="formRow-label" >Location</label></div>
+              </dt>
+              <dd>
+                <div class="user-info" th:text="${userShown.userLocation}" ></div></dd>
+            </dl>
+            <dl class="formRow formRow--input">
+              <dt>
+                <div class="formRow-labelWrapper">
+                  <label class="formRow-label" >About you</label></div>
+              </dt>
+              <dd>
+                <div class="user-info" th:text="${userShown.userInfo}" ></div></dd>
+
+            </dl>
+
+
+          </div>
+          <!--
+          <dl class="formRow formSubmitRow formSubmitRow--sticky" data-xf-init="form-submit-row">
+            <dt></dt>
+            <dd>
+              <div class="formSubmitRow-main">
+                <div class="formSubmitRow-bar"></div>
+                <div class="formSubmitRow-controls">
+                  <button type="submit" class="button--primary button button--icon button--icon--save" ><span class="button-text">Save</span></button>
+                </div>
+              </div>
+            </dd>
+          </dl>
+          -->
+
+        </div>
+
+        <input type="hidden" name="_xfToken" value="1696939748,a5bce6bca255411f4b52aaa52160b457">
+
+      </form>
+      <div th:if="${message}" class="alert alert-info" th:text="${message}" id="alert-text"></div>
+
+    </div>
+  </div>
+  <div id="post-list"></div>
+
+  <div id="pagination"></div>
+</div>
+
+<div class="note">
+  <span><i class="fa fa-pencil-square-o"></i>&nbsp; Create Post</span>&nbsp;&nbsp;&nbsp;<a href="/posts/create"><i class="fa fa-share-square"></i></a><br>
+  <span><i class="fa fa-book"></i>&nbsp; View My Posts</span>&nbsp;&nbsp;&nbsp;<a th:href="@{/posts/user(id=${id})}"><i class="fa fa-share-square"></i></a><br>
+</div>
+</div>
+<script th:inline="javascript">
+  function hideIconBar(){
+    var iconBar = document.getElementById("iconBar");
+    var navigation = document.getElementById("navigation");
+    iconBar.setAttribute("style", "display:none;");
+    navigation.classList.remove("hide");
+  }
+
+  function showIconBar(){
+    var iconBar = document.getElementById("iconBar");
+    var navigation = document.getElementById("navigation");
+    iconBar.setAttribute("style", "display:block;");
+    navigation.classList.add("hide");
+  }
+  var currUser = [[${currUser}]];
+  var userShown = [[${userShown}]];
+
+  if (currUser.userId === userShown.userId || currUser.userRole == "admin") {
+    // Tạo phần tử <dl>
+    var dlElement = document.createElement("dl");
+    dlElement.classList.add("formRow", "formSubmitRow", "formSubmitRow--sticky");
+    dlElement.setAttribute("data-xf-init", "form-submit-row");
+
+    // Tạo phần tử <dt>
+    var dtElement = document.createElement("dt");
+
+    // Tạo phần tử <dd>
+    var ddElement = document.createElement("dd");
+
+    // Tạo phần tử <div> chứa nội dung
+    var divElement = document.createElement("div");
+    divElement.classList.add("formSubmitRow-main");
+
+    // Tạo phần tử <div> thanh ngang
+    var barElement = document.createElement("div");
+    barElement.classList.add("formSubmitRow-bar");
+
+    // Tạo phần tử <div> chứa nút lưu
+    var controlsElement = document.createElement("div");
+    controlsElement.classList.add("formSubmitRow-controls");
+
+    // Tạo nút lưu
+    var saveButton = document.createElement("button");
+    saveButton.setAttribute("type", "submit");
+    saveButton.classList.add("button--primary", "button", "button--icon", "button--icon--save");
+
+    // Tạo phần tử <span> chứa văn bản của nút lưu
+    var buttonText = document.createElement("span");
+    buttonText.classList.add("button-text");
+    buttonText.textContent = "Edit Profile";
+
+    // Gắn các phần tử vào nhau theo cấu trúc
+    saveButton.appendChild(buttonText);
+    controlsElement.appendChild(saveButton);
+    divElement.appendChild(barElement);
+    divElement.appendChild(controlsElement);
+    ddElement.appendChild(divElement);
+    dlElement.appendChild(dtElement);
+    dlElement.appendChild(ddElement);
+
+    // Gắn phần tử <dl> vào <div class="block-body">
+    var blockBody = document.getElementById('form-block-body')
+    blockBody.appendChild(dlElement);
+  }
+</script>
+</body>
+</html>

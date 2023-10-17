@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet"
+          th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap}" rel="stylesheet">
+</head>
+<body>
+<header>
+    <!--NavBar Section-->
+    <div class="navbar">
+        <nav class="navigation hide" id="navigation">
+            <span class="close-icon" id="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/forums">Forums</a></li>
+                <li class="nav-item"><a href="/posts?keyword=">Posts</a></li>
+            </ul>
+        </nav>
+        <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
+        <div class="brand">My Forum</div>
+        <div class="user-profile">
+            <i class="fa fa-user" style="color: #D3D3D3"></i>
+            <a th:href="@{'/user?id=' + ${id}}" th:text="${currUserName}">
+
+            </a>
+        </div>
+    </div>
+    <!--SearchBox Section-->
+    <div class="search-box">
+        <div>
+            <input type="text" name="q" id="search-input" placeholder="Search ...">
+            <button id="search-button"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <!--Navigation-->
+    <div class="navigate">
+    <span>
+        <a href="">MyForum - Forums</a> >>
+        <a href="#" text="My Post"></a>
+    </span>
+    </div>
+    <div th:if="${message}" class="alert alert-info" th:text="${message}" id="alert-text"></div>
+    <!--starts here-->
+    <div id="post-list"></div>
+
+    <div id="pagination"></div>
+</div>
+
+<div class="note">
+    <span><i class="fa fa-pencil-square-o"></i>&nbsp; Create Post</span>&nbsp;&nbsp;&nbsp;<a href="/posts/create"><i class="fa fa-share-square"></i></a><br>
+    <span><i class="fa fa-book"></i>&nbsp; View My Posts</span>&nbsp;&nbsp;&nbsp;<a href="#"><i class="fa fa-share-square"></i></a><br>
+
+</div>
+</div>
+<script th:inline="javascript">
+    //NavBar
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input');
+
+    // Định nghĩa hàm xử lý tìm kiếm
+    function handleSearch() {
+        // Lấy giá trị từ khóa tìm kiếm và loại tìm kiếm đã chọn
+        const searchKeyword = searchInput.value;
+
+
+        window.location.href = "posts?keyword=" + encodeURIComponent(searchKeyword);
+
+        searchInput.value = '';
+    }
+
+    // Gán hàm xử lý sự kiện khi người dùng nhấn vào nút tìm kiếm
+    searchButton.addEventListener('click', handleSearch);
+    function hideIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:none;");
+        navigation.classList.remove("hide");
+    }
+
+    function showIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:block;");
+        navigation.classList.add("hide");
+    }
+
+    function showIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:block;");
+        navigation.classList.add("hide");
+    }
+
+    var posts = [[${posts}]];
+    var postsPerPage = 10; // Số bài viết trên mỗi trang
+    var currentPage = 1;
+    // Tính số lượng trang dựa trên số lượng bài viết và số bài viết trên mỗi trang
+    var totalPages = Math.ceil(posts.length / postsPerPage);
+
+    // Chia danh sách bài viết thành các phân đoạn (mỗi phân đoạn có 10 bài viết)
+    var segmentedPosts = [];
+    for (var i = 0; i < posts.length; i += postsPerPage) {
+        segmentedPosts.push(posts.slice(i, i + postsPerPage));
+    }
+
+    // Hiển thị bài viết của trang hiện tại
+    function renderCurrentPage() {
+        var currentPosts = segmentedPosts[currentPage - 1]; // Lấy danh sách bài viết của trang hiện tại
+
+        // Xóa các bài viết hiện tại
+        var postList = document.getElementById("post-list");
+        while (postList.firstChild) {
+            postList.removeChild(postList.firstChild);
+        }
+
+        // Hiển thị các bài viết của trang hiện tại
+        currentPosts.forEach(function (post) {
+            var postElement = document.createElement("div");
+            postElement.className = "table-row";
+            var statusElement = document.createElement("div");
+            statusElement.className = "status";
+            statusElement.innerHTML = "<i class='fa fa-fire'></i>";
+            var subjectElement = document.createElement("div");
+            subjectElement.className = "subjects";
+            var subjectLink = document.createElement("a");
+            subjectLink.setAttribute("href", "/details?id=" + encodeURIComponent(post.postId) + "&page=1");
+            subjectLink.textContent = post.postSubject;
+            var startedByElement = document.createElement("span");
+            startedByElement.innerHTML = "Started by <b><a href='/user?id=" + post.postBy + "'>" + post.postByName + "</a></b> .";
+            subjectElement.appendChild(subjectLink);
+            subjectElement.appendChild(document.createElement("br"));
+            subjectElement.appendChild(startedByElement);
+
+            var repliesElement = document.createElement("div");
+            repliesElement.className = "replies";
+            repliesElement.textContent = post.postReplies + " replies \n" ;
+
+
+            // Thêm các phần tử vào phần tử bài viết
+            postElement.appendChild(statusElement);
+            postElement.appendChild(subjectElement);
+            postElement.appendChild(repliesElement);
+
+            // Thêm phần tử bài viết vào phần tử "post-list"
+            postList.appendChild(postElement);
+        });
+    }
+
+    renderCurrentPage();
+    //renderPagination();
+</script>
+</body>
+</html>

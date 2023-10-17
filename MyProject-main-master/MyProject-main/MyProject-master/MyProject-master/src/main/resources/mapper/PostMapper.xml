@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myproject.db.mapper.PostMapper">
+    <resultMap id="post" type="com.example.myproject.db.Post">
+        <result column="post_id" property="postId"/>
+        <result column="post_subject" property="postSubject"/>
+        <result column="post_content" property="postContent"/>
+        <result column="post_by" property="postBy"/>
+        <result column="post_date" property="postDate"/>
+        <result column="post_replies" property="postReplies"/>
+    </resultMap>
+    <insert id="insertPost" parameterType="com.example.myproject.db.Post">
+        insert into posts(post_id,
+                          post_subject,
+                          post_content,
+                          post_by,
+                          post_date,
+                          post_replies)
+        values (#{postId},
+                #{postSubject},
+                #{postContent},
+                #{postBy},
+                NOW(),
+                #{postReplies})
+    </insert>
+    <select id="listBySubject" resultMap="post" parameterType="map">
+        select * from posts
+        where post_subject like concat("%", #{keyword},"%")
+
+    </select>
+    <update id="updatePostReplies" parameterType="com.example.myproject.db.Post">
+        update posts
+        set post_replies = #{postReplies}
+        where post_id = #{postId}
+    </update>
+    <select id="listTopViewedPost" resultMap="post" parameterType="map">
+        select * from posts
+        order by post_replies desc
+        limit 5
+    </select>
+    <select id="listMostRecentPost" resultMap="post" parameterType="map">
+        select * from posts
+        order by post_date desc
+            limit 5
+    </select>
+    <select id="findPostBySubjectOrId" resultMap="post" parameterType="map">
+        select *
+        from posts
+        where post_subject=#{postSubject}
+          or post_id=#{postId}
+          and post_by=#{postBy};
+    </select>
+    <select id="listPostByUser" resultMap="post" parameterType="map">
+        select *
+        from posts
+        where post_by=#{postBy};
+    </select>
+    <update id="updatePostById" parameterType="com.example.myproject.db.Post">
+        update posts
+        set post_subject = #{postSubject},
+            post_content = #{postContent}
+        where post_id = #{postId}
+    </update>
+</mapper>

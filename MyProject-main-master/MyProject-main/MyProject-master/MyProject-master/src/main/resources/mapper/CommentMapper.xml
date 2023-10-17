@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myproject.db.mapper.CommentMapper">
+    <resultMap id="comment" type="com.example.myproject.db.Comment">
+        <result column="comment_id" property="commentId"/>
+        <result column="comment_content" property="commentContent"/>
+        <result column="comment_to" property="commentTo"/>
+        <result column="comment_by" property="commentBy"/>
+        <result column="comment_date" property="commentDate"/>
+        <result column="comment_of_post" property="commentOfPost"/>
+    </resultMap>
+    <insert id="insert" parameterType="com.example.myproject.db.Comment">
+        insert into comments(comment_id,
+                             comment_content,
+                             comment_by,
+                             comment_to,
+                             comment_of_post,
+                             comment_date)
+        values (#{commentId},
+                #{commentContent},
+                #{commentBy},
+                #{commentTo},
+                #{commentOfPost},
+                NOW())
+    </insert>
+    <select id="getPostDetail" resultMap="comment" parameterType="map">
+        select *
+        from comments
+        where comment_of_post=#{commentOfPost}
+        order by comment_date
+    </select>
+    <update id="updateCommentOfPost" parameterType="com.example.myproject.db.Comment">
+        update comments
+        set comment_content = #{commentContent}
+        where comment_id = 0
+        and comment_of_post=#{commentOfPost}
+    </update>
+</mapper>

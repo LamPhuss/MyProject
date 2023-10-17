@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to my website</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container-fluid text-center">
+    <h1>Welcome</h1>
+    <h2>Login</h2>
+    <form th:action="@{/users/login}" method="post" th:object="${user}">
+        <div class="border border-secondary rounded p-3">
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">E-mail:</label>
+                <div class="col-sm-8">
+                    <input type="email" th:field="*{userEmail}" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Password:</label>
+                <div class="col-sm-8">
+                    <input type="password" th:field="*{userPassword}" class="form-control" />
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary m-2">Login</button>
+                <button type="button" class="btn btn-secondary m-2" onclick="createUser()">CreateUser</button>
+            </div>
+        </div>
+    </form>
+    <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>
+</div>
+</div>
+<script type="text/javascript">
+    function createUser(){
+        window.location="/users/new";
+    }
+</script>
+</body>
+</html>

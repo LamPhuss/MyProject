@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap}" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <!--NavBar Section-->
+        <div class="navbar">
+            <nav class="navigation hide" id="navigation">
+                <span class="close-icon" id="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="/forums">Forums</a></li>
+                    <li class="nav-item"><a href="/posts?keyword=">Posts</a></li>
+                </ul>
+            </nav>
+            <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
+            <div class="brand">My Forum</div>
+            <div class="user-profile">
+                <i class="fa fa-user" style="color: #D3D3D3"></i>
+                <a th:href="@{'/user?id=' + ${id}}" th:text="${currUserName}">
+
+                </a>
+            </div>
+        </div>
+        <!--SearchBox Section-->
+        <div class="search-box">
+            <div>
+                <input type="text" name="q" id="search-input" placeholder="Search ...">
+                <button id="search-button"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <!--Navigation-->
+        <div class="navigate">
+            <span><a href="/forums">MyForum - Forums</a> >> <a th:href="@{/details(id=${postId}, page=1)}" >Post detail</a></span>
+        </div>
+
+        <!--Topic Section-->
+        <div class="topic-container">
+
+            <!--Original thread-->
+            <div class="head">
+                <div class="authors">Author</div>
+                <div class="content">Topic details</div>
+                <div><a th:href="@{'/edit/details?id=' + ${postId}}"><button type="submit" class="button--primary button button--icon button--icon--save"><span class="button-text" >Edit</span></button>
+                </a></div>
+            </div>
+            <div class="body">
+                <div class="authors">
+                    <div class="username"><a th:href="@{'/user?id=' + ${poster.commentBy}}" th:text="${poster.userCommentByName}"></a></div>
+                    <div>Role</div>
+                    <img src="https://cdn.pixabay.com/photo/2015/11/06/13/27/ninja-1027877_960_720.jpg" alt="" class="limit-size">
+                </div>
+                <div class="content">
+                    <span th:text="${poster.commentContent}" style="font-size:20px;">comment</span>
+                    <hr>
+                    <br>
+                    <div class="comment">
+                        <button onclick="showComment('comment-area')">Comment</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="comment-area hide" id="comment-area">
+                <form action="/details/submit" method="post">
+                    <textarea name="reply" placeholder="reply here ..."></textarea>
+                    <input type="hidden" name="commentToId" th:value="${poster.commentOfPost}" />
+                    <input type="hidden" name="commentTo" value="0" />
+                    <input type="submit" value="submit">
+                </form>
+            </div>
+        </div>
+        <div class="comment-container">
+            <div class="head">
+                <div class="user">User</div>
+                <div class="comment-space">Comment</div>
+            </div>
+        <div id="comment-list"></div>
+        </div>
+        <div class="pagination">
+            <div id="input-container" class="hide" style="margin-bottom: 20px">
+                <label for="page-input">Go to page:</label>
+                <input type="number" id="page-input" min="1" max="${noPage}">
+                <button id="go-button">Go</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script th:inline="javascript">
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+
+        // Định nghĩa hàm xử lý tìm kiếm
+        function handleSearch() {
+            // Lấy giá trị từ khóa tìm kiếm và loại tìm kiếm đã chọn
+            const searchKeyword = searchInput.value;
+
+
+            window.location.href = "posts?keyword=" + encodeURIComponent(searchKeyword);
+
+            searchInput.value = '';
+        }
+
+        // Gán hàm xử lý sự kiện khi người dùng nhấn vào nút tìm kiếm
+        searchButton.addEventListener('click', handleSearch);
+        function hideIconBar(){
+            var iconBar = document.getElementById("iconBar");
+            var navigation = document.getElementById("navigation");
+            iconBar.setAttribute("style", "display:none;");
+            navigation.classList.remove("hide");
+        }
+
+        function showIconBar(){
+            var iconBar = document.getElementById("iconBar");
+            var navigation = document.getElementById("navigation");
+            iconBar.setAttribute("style", "display:block;");
+            navigation.classList.add("hide");
+        }
+        var comments = [[${comments}]];
+
+        var commentsPerPage = 10;
+
+
+        var segmentedComments = [];
+        for (var i = 0; i < comments.length; i += commentsPerPage) {
+            segmentedComments.push(comments.slice(i, i + commentsPerPage));
+        }
+        var commentToId = [[${postId}]];
+        function showComment(replyArea){
+
+            var commentArea = document.getElementById(replyArea);
+
+            commentArea.classList.toggle("hide");
+        }
+
+        function renderCurrentPage() {
+
+            // Xóa các bài viết hiện tại
+            var commentList = document.getElementById("comment-list");
+            while (commentList.firstChild) {
+                commentList.removeChild(commentList.firstChild);
+            }
+
+            comments.forEach(function (comment) {
+                var commentContainer = document.createElement("div");
+                commentContainer.classList.add("comments-container");
+
+                var bodyDiv = document.createElement("div");
+                bodyDiv.classList.add("body");
+
+                var authorsDiv = document.createElement("div");
+                authorsDiv.classList.add("authors");
+
+                var usernameDiv = document.createElement("div");
+                usernameDiv.classList.add("username");
+                var userLink = document.createElement("a");
+                userLink.href = "/user?id=" + comment.commentBy;
+                userLink.textContent = comment.userCommentByName;
+                usernameDiv.innerHTML = "";  // Xóa nội dung hiện tại của usernameDiv
+                usernameDiv.appendChild(userLink);
+                var roleDiv = document.createElement("div");
+                roleDiv.textContent = "Role";
+
+                var imgElement = document.createElement("img");
+                imgElement.src = "https://cdn.pixabay.com/photo/2015/11/06/13/27/ninja-1027877_960_720.jpg";
+                imgElement.alt = "";
+                imgElement.classList.add("limit-size");
+
+                var contentDiv = document.createElement("div");
+                contentDiv.classList.add("content");
+                if(comment.userCommentToName != "not reply") {
+                    var replyContentDiv = document.createElement("div");
+                    replyContentDiv.classList.add("reply-content");
+                    replyContentDiv.textContent = ">Reply to:" + comment.userCommentToName;
+                    contentDiv.appendChild(replyContentDiv);
+                }
+                var commentSpan = document.createElement("span");
+                commentSpan.textContent = comment.commentContent;
+
+                var hrElement = document.createElement("hr");
+                var brElement = document.createElement("br");
+
+                var commentDiv = document.createElement("div");
+                commentDiv.classList.add("comment");
+
+                var buttonElement = document.createElement("button");
+                buttonElement.textContent = "Reply";
+
+                // Thêm các phần tử vào phần tử cha
+                authorsDiv.appendChild(usernameDiv);
+                authorsDiv.appendChild(roleDiv);
+                authorsDiv.appendChild(imgElement);
+
+
+                contentDiv.appendChild(commentSpan);
+                contentDiv.appendChild(hrElement);
+                contentDiv.appendChild(brElement);
+                contentDiv.appendChild(commentDiv);
+
+                commentDiv.appendChild(buttonElement);
+
+                bodyDiv.appendChild(authorsDiv);
+                bodyDiv.appendChild(contentDiv);
+
+                commentContainer.appendChild(bodyDiv);
+
+                // Thêm phần tử bình luận vào danh sách bình luận
+                commentList.appendChild(commentContainer);
+
+                // Tạo phần tử HTML cho vùng trả lời bình luận
+                var commentArea = document.createElement("div");
+                commentArea.classList.add("comment-area", "hide");
+                commentArea.id = "reply-area";
+
+                var formElement = document.createElement("form");
+                formElement.action = "/details/submit";
+                formElement.method = "post";
+
+                var textareaElement = document.createElement("textarea");
+                textareaElement.name = "reply";
+                textareaElement.placeholder = "reply here ...";
+
+                var subjectInput = document.createElement("input");
+                subjectInput.type = "hidden";
+                subjectInput.name = "commentToId";
+                subjectInput.value = comment.commentOfPost;
+
+                var commentToInput = document.createElement("input");
+                commentToInput.type = "hidden";
+                commentToInput.name = "commentTo";
+                commentToInput.value = comment.commentBy;
+
+                var submitInput = document.createElement("input");
+                submitInput.type = "submit";
+                submitInput.value = "submit";
+
+                formElement.appendChild(textareaElement);
+                formElement.appendChild(subjectInput);
+                formElement.appendChild(commentToInput);
+                formElement.appendChild(submitInput);
+
+                commentArea.appendChild(formElement);
+
+                // Thêm phần tử vùng trả lời bình luận vào phần tử cha
+                commentContainer.appendChild(commentArea);
+
+                // Đặt sự kiện onclick cho buttonElement
+                buttonElement.onclick = function () {
+                    toggleCommentArea(commentArea);
+                };
+            });
+        }
+        function toggleCommentArea(commentArea) {
+            commentArea.classList.toggle("hide");
+        }
+        renderCurrentPage();
+        var totalPages = [[${noPage}]];// Số lượng pagination được truyền từ controller
+        var paginationContainer = document.querySelector('.pagination');
+
+        function showPagination(totalPages) {
+            var currPage = [[${currPage}]];
+            if (currPage != 1) {
+                var prevButton2 = document.createElement('a');
+                prevButton2.href = '/details?id=' + commentToId + '&page=' + (currPage-1);
+                prevButton2.textContent = "Prev";
+                prevButton2.id="prev-button"
+                paginationContainer.appendChild(prevButton2);
+            }
+            if (currPage <= 5) {
+                if (totalPages <= 3) {
+                    for (var i = 1; i <= totalPages; i++) {
+                        var link = document.createElement('a');
+                        link.href = '/details?id=' + commentToId + '&page=' + i;
+                        link.textContent = i;
+                        paginationContainer.appendChild(link);
+                    }
+                } else {
+                    if (currPage + 2 <= totalPages) {
+                        for (var i = 1; i <= currPage + 2; i++) {
+                            var link = document.createElement('a');
+                            link.href = '/details?id=' + commentToId + '&page=' + i;
+                            link.textContent = i;
+                            paginationContainer.appendChild(link);
+                        }
+                    } else {
+                        for (var i = 1; i <= totalPages; i++) {
+                            var link = document.createElement('a');
+                            link.href = '/details?id=' + commentToId + '&page=' + i;
+                            link.textContent = i;
+                            paginationContainer.appendChild(link);
+                        }
+                    }
+                    var dots = document.createElement("a");
+                    dots.textContent = "...";
+                    dots.classList.add("dots");
+                    dots.addEventListener("click", function () {
+                        showPageInput();
+                    });
+                    paginationContainer.appendChild(dots);
+                    var firstLink = document.createElement('a');
+                    firstLink.href = '/details?id=' + commentToId + '&page=' + totalPages;
+                    firstLink.textContent = totalPages;
+                    paginationContainer.appendChild(firstLink);
+                }
+                if (currPage != totalPages) {
+                    var nextButton1 = document.createElement('a');
+                    nextButton1.href = '/details?id=' + commentToId + '&page=' + (currPage + 1);
+                    nextButton1.textContent = "Next";
+                    paginationContainer.appendChild(nextButton1);
+                }
+
+            } else {
+                if (currPage != 1) {
+                    var prevButton2 = document.createElement('a');
+                    prevButton2.href = '/details?id=' + commentToId + '&page=' + (currPage-1);
+                    prevButton2.textContent = "Prev";
+                    prevButton2.id="prev-button"
+                    paginationContainer.appendChild(prevButton2);
+                }
+                var firstLink = document.createElement('a');
+                firstLink.href = '/details?id=' + commentToId + '&page=' + 1;
+                firstLink.textContent = 1;
+                paginationContainer.appendChild(firstLink);
+                var dots = document.createElement("a");
+                dots.textContent = "...";
+                dots.classList.add("dots");
+                dots.addEventListener("click", function() {
+                    showPageInput();
+                });
+                paginationContainer.appendChild(dots);
+                if (currPage+2<totalPages){
+                for (var i = currPage-2; i <= currPage + 2; i++) {
+                    var link = document.createElement('a');
+                    link.href = '/details?id=' + commentToId + '&page=' + i;
+                    link.textContent = i;
+                    paginationContainer.appendChild(link);
+                }
+                var dots = document.createElement("a");
+                dots.textContent = "...";
+                dots.classList.add("dots");
+                dots.addEventListener("click", function() {
+                    showPageInput();
+                });
+                paginationContainer.appendChild(dots);
+                var firstLink = document.createElement('a');
+                firstLink.href = '/details?id=' + commentToId + '&page=' + totalPages;
+                firstLink.textContent = totalPages;
+                paginationContainer.appendChild(firstLink);
+                }
+                else {
+                    for (var i = currPage-2; i <= totalPages; i++) {
+                        var link = document.createElement('a');
+                        link.href = '/details?id=' + commentToId + '&page=' + i;
+                        link.textContent = i;
+                        paginationContainer.appendChild(link);
+                    }
+                }
+                if (currPage != totalPages) {
+                    var nextButton1 = document.createElement('a');
+                    nextButton1.href = '/details?id=' + commentToId + '&page=' + (currPage + 1);
+                    nextButton1.textContent = "Next";
+                    paginationContainer.appendChild(nextButton1);
+                }
+            }
+        }
+        function showPageInput() {
+            var paginate = document.getElementById('input-container');
+
+            paginate.classList.toggle("hide");
+        }
+        showPagination(totalPages)
+
+        function handleGoButton() {
+            var goButton = document.getElementById('go-button');
+            goButton.addEventListener('click', function () {
+                var pageInput = document.getElementById('page-input');
+                var pageNumber = parseInt(pageInput.value);
+                if (pageNumber >= 1 && pageNumber <= totalPages) {
+                    var url = '/details?id=' + commentToId + '&page=' + pageNumber;
+                    window.location.href = url;
+                }
+            });
+        }
+
+        handleGoButton()
+    </script>
+
+</body>
+</html>

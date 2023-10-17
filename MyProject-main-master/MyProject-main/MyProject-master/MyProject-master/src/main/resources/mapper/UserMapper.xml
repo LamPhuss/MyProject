@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myproject.db.mapper.UserMapper">
+    <resultMap id="user" type="com.example.myproject.db.User">
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_password" property="userPassword"/>
+        <result column="user_email" property="userEmail"/>
+        <result column="user_dob" property="userDob"/>
+        <result column="user_location" property="userLocation"/>
+        <result column="user_more_info" property="userInfo"/>
+        <result column="user_role" property="userRole"/>
+    </resultMap>
+    <select id="count" resultType="int" parameterType="map">
+        select count(*)
+        from users
+    </select>
+    <insert id="insert" parameterType="com.example.myproject.db.User">
+        insert into users(user_id,
+                          user_name,
+                          user_password,
+                          user_email,
+                          user_dob,
+                          user_location,
+                          user_more_info,
+                          user_role)
+        values (#{userId},
+                #{userName},
+                #{userPassword},
+                #{userEmail},
+                #{userDob},
+                #{userLocation},
+                #{userInfo},
+                "user");
+    </insert>
+    <select id="findUser" resultMap="user" parameterType="map">
+        select *
+        from users
+        where user_email=#{userEmail}
+          and user_password=#{userPassword}
+    </select>
+
+    <update id="updateUser" parameterType="com.example.myproject.db.User">
+        update users
+        set user_name = #{userName},
+            user_password = #{userPassword},
+            user_email = #{userEmail},
+            user_dob = #{userDob},
+            user_location = #{userLocation},
+            user_more_info = #{userInfo}
+        where user_id = #{userId}
+    </update>
+    <select id="findUserById" resultMap="user" parameterType="map">
+        select *
+        from users
+        where user_id = #{userId};
+    </select>
+    <select id="findUserByEmail" resultMap="user" parameterType="map">
+        select *
+        from users
+        where user_email=#{userEmail};
+    </select>
+</mapper>
