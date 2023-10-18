@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet"
+          th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Titillium+Web:ital@1&display=swap}" rel="stylesheet">
+</head>
+<body>
+<header>
+    <!--NavBar Section-->
+    <div class="navbar">
+        <nav class="navigation hide" id="navigation">
+            <span class="close-icon" id="close-icon" onclick="showIconBar()"><i class="fa fa-close"></i></span>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/forums">Forums</a></li>
+                <li class="nav-item"><a href="/posts?keyword=">Posts</a></li>
+            </ul>
+        </nav>
+        <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
+        <div class="brand">My Forum</div>
+        <div class="user-profile">
+            <i class="fa fa-user" style="color: #D3D3D3"></i>
+            <a th:href="@{'/user?id=' + ${id}}" th:text="${currUserName}">
+
+            </a>
+        </div>
+    </div>
+    <!--SearchBox Section-->
+    <div class="search-box">
+        <div>
+            <input type="text" name="q" id="search-input" placeholder="Search ...">
+            <button id="search-button"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <!--Navigation-->
+    <div class="navigate">
+    <span>
+        <a href="">MyForum - Forums</a> >>
+        <a href="#">Manage Users</a>
+    </span>
+    </div>
+    <div th:if="${message}" class="alert alert-info" th:text="${message}" id="alert-text"></div>
+    <div class="head">
+        <div class="name-container">User</div>
+        <div class="email-container">Email</div>
+        <div class="password-container">Password</div>
+        <div class="button-container"></div>
+        </a>
+    </div>
+
+    <div id="user-list-container"></div>
+
+</div>
+
+<div class="note">
+    <span><i class="fa fa-user-plus"></i>&nbsp; Create User</span>&nbsp;&nbsp;&nbsp;<a href="/users/new"><i
+        class="fa fa-share-square"></i></a><br>
+    <span><i class="fa fa-pencil-square-o"></i>&nbsp; Create Post</span>&nbsp;&nbsp;&nbsp;<a href="/posts/create"><i
+        class="fa fa-share-square"></i></a><br>
+    <span><i class="fa fa-book"></i>&nbsp; View My Posts</span>&nbsp;&nbsp;&nbsp;<a
+        th:href="@{/posts/user(id=${id})}"><i class="fa fa-share-square"></i></a><br>
+</div>
+</div>
+<script th:inline="javascript">
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input');
+
+    // Định nghĩa hàm xử lý tìm kiếm
+    function handleSearch() {
+        // Lấy giá trị từ khóa tìm kiếm và loại tìm kiếm đã chọn
+        const searchKeyword = searchInput.value;
+
+
+        window.location.href = "posts?keyword=" + encodeURIComponent(searchKeyword);
+
+        searchInput.value = '';
+    }
+
+    // Gán hàm xử lý sự kiện khi người dùng nhấn vào nút tìm kiếm
+    searchButton.addEventListener('click', handleSearch);
+    function hideIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:none;");
+        navigation.classList.remove("hide");
+    }
+
+    function showIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:block;");
+        navigation.classList.add("hide");
+    }
+
+    var userList = [[${userList}]];
+    function listAllUsers(users) {
+        users.forEach(function (user) {
+            // Tạo phần tử div chứa tên người dùng và vai trò
+            var nameContainer = document.createElement('div');
+            nameContainer.className = 'name-container';
+
+            var username = document.createElement('div');
+            username.className = 'username';
+            var usernameLink = document.createElement('a');
+            usernameLink.href = "/user?id=" + user.userId;
+            usernameLink.textContent = user.userName;
+            username.appendChild(usernameLink);
+
+            var role = document.createElement('div');
+            role.textContent = user.userRole;
+
+            nameContainer.appendChild(username);
+            nameContainer.appendChild(role);
+
+            // Tạo phần tử div chứa email
+            var emailContainer = document.createElement('div');
+            emailContainer.className = 'email-container';
+            var emailSpan = document.createElement('span');
+            emailSpan.style.fontSize = '20px';
+            emailSpan.textContent = user.userEmail;
+            emailContainer.appendChild(emailSpan);
+
+            // Tạo phần tử div chứa password
+            var passwordContainer = document.createElement('div');
+            passwordContainer.className = 'password-container';
+            var passwordSpan = document.createElement('span');
+            passwordSpan.style.fontSize = '20px';
+            passwordSpan.textContent = user.userPassword;
+            passwordContainer.appendChild(passwordSpan);
+
+            var buttonDiv = document.createElement("div");
+            buttonDiv.className = "button-container";
+            var button = document.createElement("button");
+            button.type = "submit";
+            button.className = "button--primary button button--icon button--icon--save";
+            button.addEventListener("click", function() {
+
+                 window.location.href = "/delete/user?id="+ user.userId ;
+            });
+
+            var buttonSpan = document.createElement("span");
+            buttonSpan.className = "button-text";
+            buttonSpan.textContent = "Delete";
+            button.appendChild(buttonSpan);
+            buttonDiv.appendChild(button);
+
+            var bodyDiv = document.createElement('div');
+            bodyDiv.className = 'body';
+            bodyDiv.appendChild(nameContainer);
+            bodyDiv.appendChild(emailContainer);
+            bodyDiv.appendChild(passwordContainer);
+            bodyDiv.appendChild(buttonDiv);
+
+            var userContainerDiv = document.createElement('div');
+            userContainerDiv.className = 'comments-container';
+            userContainerDiv.appendChild(bodyDiv);
+
+            var listContainer = document.getElementById("user-list-container");
+            listContainer.appendChild(userContainerDiv)
+
+        });
+    }
+    listAllUsers(userList);
+</script>
+</body>
+</html>

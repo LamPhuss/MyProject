@@ -61,4 +61,9 @@
             post_content = #{postContent}
         where post_id = #{postId}
     </update>
+    <delete id="deletePost" parameterType="com.example.myproject.db.Post">
+        delete from posts
+        where post_id = #{postId}
+    </delete>
+
 </mapper>

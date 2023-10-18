@@ -154,7 +154,27 @@
     }
 
     renderCurrentPage();
-    //renderPagination();
+    var role = [[${currUserRole}]]; // Điều kiện của bạn ở đây
+    var currId = [[${id}]]
+    if (role === "admin") {
+        // Tạo phần tử <li> mới
+        var li = document.createElement("li");
+        li.className = "nav-item";
+
+        // Tạo thẻ <a> mới
+        var a = document.createElement("a");
+        a.href = "/admin?id=" + currId;
+        a.textContent = "Manage";
+
+        // Gắn thẻ <a> vào thẻ <li>
+        li.appendChild(a);
+
+        // Lấy thẻ <ul> có class "nav-list"
+        var ul = document.querySelector(".nav-list");
+
+        // Gắn thẻ <li> mới vào thẻ <ul>
+        ul.appendChild(li);
+    }
 </script>
 </body>
 </html>

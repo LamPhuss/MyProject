@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -142,5 +142,42 @@ public class UserService {
         } catch (Exception e){
             throw e;
         }
+    }
+    public List<User> listAllUser ()throws Exception{
+        return userMapper.listAll();
+    }
+    public void deleteUser(String userId) throws Exception {
+        Map<String,Object> reqMap = new HashMap<>();
+        reqMap.put("userId",userId);
+        userMapper.deleteUser(reqMap);
+    }
+    public String init_password() {
+        Random ran = new Random();
+        List<String> result = new ArrayList<>();
+        Consumer<String> appendChar = s -> {
+            int number = ran.nextInt(s.length()) + 0;
+            result.add("" + s.charAt(number));
+        };
+        appendChar.accept("0123456789");
+        appendChar.accept("!@#$%^&*()");
+        appendChar.accept("abcdefghijklmnopqrstuvwxyz");
+        appendChar.accept("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        while (result.size() < 8) {
+            appendChar.accept("0123456789!@#$%^&*()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        }
+        Collections.shuffle(result, ran);
+        return String.join("", result);
+    }
+    public String resetPassword(String userName,String userEmail) throws Exception{
+        String newPassword = init_password();
+        Map<String, Object> reqMap = new HashMap<>();
+        reqMap.put("userName",userName);
+        reqMap.put("userEmail",userEmail);
+        if(userMapper.checkUser(reqMap) == null){
+            return null;
+        }
+        reqMap.put("userPassword",newPassword);
+        userMapper.resetPassword(reqMap);
+        return newPassword;
     }
 }

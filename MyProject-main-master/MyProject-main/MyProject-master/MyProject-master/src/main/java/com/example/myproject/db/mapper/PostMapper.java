@@ -16,4 +16,5 @@ public interface PostMapper {
     Post findPostBySubjectOrId (Map<String,Object> reqMap) throws Exception;
     List<Post> listPostByUser (Map<String, Object> reqMap) throws Exception;
     void updatePostById (Map<String,Object> reqMap) throws Exception;
+    void deletePost(Map<String,Object> reqMap) throws Exception;
 }

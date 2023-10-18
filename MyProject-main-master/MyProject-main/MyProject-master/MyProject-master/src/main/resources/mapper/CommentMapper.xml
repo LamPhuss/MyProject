@@ -35,4 +35,8 @@
         where comment_id = 0
         and comment_of_post=#{commentOfPost}
     </update>
+    <delete id="deleteCommentByPost" parameterType="com.example.myproject.db.Comment">
+        delete from comments
+        where comment_of_post=#{commentOfPost}
+    </delete>
 </mapper>

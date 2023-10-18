@@ -24,18 +24,7 @@
     <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
     <div class="brand">My Forum</div>
   </div>
-  <!--SearchBox Section-->
-  <div class="search-box">
-    <div>
-      <select name="search-type" id="search-type">
-        <option value="everything">Everything</option>
-        <option value="titles">Titles</option>
-        <option value="descriptions">Descriptions</option>
-      </select>
-      <input type="text" name="q" id="search-input" placeholder="Search ...">
-      <button id="search-button"><i class="fa fa-search"></i></button>
-    </div>
-  </div>
+
 </header>
 <div class="container">
   <div class="pageContent">
@@ -188,6 +177,26 @@
     // Gắn phần tử <dl> vào <div class="block-body">
     var blockBody = document.getElementById('form-block-body')
     blockBody.appendChild(dlElement);
+  }
+
+  if (currUser.userRole === "admin") {
+    // Tạo phần tử <li> mới
+    var li = document.createElement("li");
+    li.className = "nav-item";
+
+    // Tạo thẻ <a> mới
+    var a = document.createElement("a");
+    a.href = "/admin?id=" + currUser.userId;
+    a.textContent = "Manage";
+
+    // Gắn thẻ <a> vào thẻ <li>
+    li.appendChild(a);
+
+    // Lấy thẻ <ul> có class "nav-list"
+    var ul = document.querySelector(".nav-list");
+
+    // Gắn thẻ <li> mới vào thẻ <ul>
+    ul.appendChild(li);
   }
 </script>
 </body>

@@ -99,4 +99,9 @@ public class PostService {
         return true;
 
     }
+    public void deletePost(int postId) throws Exception {
+        Map<String,Object> reqMap = new HashMap<>();
+        reqMap.put("postId",postId);
+        postMapper.deletePost(reqMap);
+    }
 }

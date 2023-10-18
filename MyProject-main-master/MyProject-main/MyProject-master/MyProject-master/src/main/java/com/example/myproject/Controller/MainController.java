@@ -53,7 +53,8 @@ public class MainController {
     }
 
     @PostMapping("/users/add")
-    public String addUser(User user, RedirectAttributes ra) throws Exception {
+    public String addUser(User user, RedirectAttributes ra, HttpSession session) throws Exception {
+        User currUser = (User) session.getAttribute("user");
         if (userService.findUserByEmail(user.getUserEmail()) != null) {
             ra.addFlashAttribute("message", ResponeMessage.duplicateEmailError);
             return "redirect:/users/new";
@@ -63,6 +64,13 @@ public class MainController {
                 ra.addFlashAttribute("message", ResponeMessage.addUserError);
                 return "redirect:/users/new";
             } else {
+                if (currUser != null) {
+                    User admin = userService.loginUser(currUser);
+                    if (Objects.equals(admin.getUserRole(), "admin")) {
+                        ra.addFlashAttribute("message", ResponeMessage.addUserSuccess);
+                        return "redirect:/admin?id=" + admin.getUserId();
+                    }
+                }
                 ra.addFlashAttribute("message", ResponeMessage.addUserSuccess);
                 return "redirect:/";
             }
@@ -108,11 +116,12 @@ public class MainController {
         model.addAttribute("mostRecentPosts", mostRecentPosts);
         model.addAttribute("id", currUser.getUserId());
         model.addAttribute("currUserName", currUser.getUserName());
+        model.addAttribute("currUserRole", currUser.getUserRole());
         return "forums";
     }
 
     @GetMapping("/posts")
-    public String showPost(@RequestParam("keyword") String keyword, Model model, HttpSession session, RedirectAttributes ra) throws Exception {
+    public String showPost(@RequestParam("keyword") String keyword,@RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpSession session, RedirectAttributes ra) throws Exception {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             ra.addFlashAttribute("message", ResponeMessage.authenticateError);
@@ -121,13 +130,21 @@ public class MainController {
         User currUser = userService.loginUser(user);
         model.addAttribute("id", currUser.getUserId());
         model.addAttribute("currUserName", currUser.getUserName());
-        List<Post> posts = postService.listPostBySubject(keyword);
-        for (Post post : posts) {
+        model.addAttribute("currUserRole", currUser.getUserRole());
+        String cleanedKeyword = keyword.replaceAll("/page=" + page, "");
+        List<Post> posts = postService.listPostBySubject(cleanedKeyword);
+        model.addAttribute("noPage", (int) Math.ceil((double) posts.size() / 10));
+        int pageSize = 10;
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = startIndex + pageSize;
+        List<Post> postsOnPage = posts.subList(startIndex, Math.min(endIndex, posts.size()));
+        for (Post post : postsOnPage) {
             String posterName = (userService.findUserById(post.getPostBy())).getUserName();
             post.setPostByName(posterName);
         }
-        model.addAttribute("posts", posts);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("posts", postsOnPage);
+        model.addAttribute("keyword", cleanedKeyword);
+        model.addAttribute("currPage", page);
         return "posts";
     }
 
@@ -186,6 +203,7 @@ public class MainController {
         model.addAttribute("comments", commentsOnPage);
         model.addAttribute("postId", id);
         model.addAttribute("currPage", page);
+        model.addAttribute("currUserRole", currUser.getUserRole());
         return "details";
 
     }
@@ -218,7 +236,7 @@ public class MainController {
         String day = null;
         String month = null;
         String year = null;
-        if (!Objects.equals(currUser.getUserId(), userShown.getUserId())) {
+        if (!Objects.equals(currUser.getUserId(), userShown.getUserId()) && !Objects.equals(currUser.getUserRole(), "admin")) {
             ra.addFlashAttribute("message", ResponeMessage.permissionDenial);
             return "redirect:/user?id=" + currUser.getUserId();
         }
@@ -233,6 +251,7 @@ public class MainController {
         model.addAttribute("defaultDay", day);
         model.addAttribute("defaultMonth", month);
         model.addAttribute("defaultYear", year);
+        model.addAttribute("currUserRole",currUser.getUserRole());
         return "update_user_form";
     }
 
@@ -244,7 +263,7 @@ public class MainController {
             return "redirect:/";
         }
         User currUser = userService.loginUser(user);
-        if (!Objects.equals(currUser.getUserId(), id)) {
+        if (!Objects.equals(currUser.getUserId(), id) && !Objects.equals(currUser.getUserRole(), "admin")) {
             ra.addFlashAttribute("message", ResponeMessage.permissionDenial);
             return "redirect:/user?id=" + currUser.getUserId();
         }
@@ -267,10 +286,12 @@ public class MainController {
             ra.addFlashAttribute("message", ResponeMessage.nullYearError);
             return "redirect:/user?id=" + id;
         }
-        if (!Objects.equals(currUser.getUserEmail(), editedUser.getUserEmail())) {
-            if (userService.findUserByEmail(editedUser.getUserEmail()) != null) {
-                ra.addFlashAttribute("message", ResponeMessage.duplicateEmailError);
-                return "redirect:/user?id=" + id;
+        if (!Objects.equals(currUser.getUserRole(), "admin")) {
+            if (!Objects.equals(currUser.getUserEmail(), editedUser.getUserEmail())) {
+                if (userService.findUserByEmail(editedUser.getUserEmail()) != null) {
+                    ra.addFlashAttribute("message", ResponeMessage.duplicateEmailError);
+                    return "redirect:/user?id=" + id;
+                }
             }
         }
         User updateUser = new User(id, editedUser.getUserName(), editedUser.getUserPassword(), editedUser.getUserEmail(), editedDob, editedUser.getUserLocation(), userInfo, null);
@@ -293,8 +314,10 @@ public class MainController {
             ra.addFlashAttribute("message", ResponeMessage.authenticateError);
             return "redirect:/";
         }
-        //User currUser = userService.loginUser(user);
+        User currUser = userService.loginUser(user);
         model.addAttribute("post", new Post());
+        model.addAttribute("currUserRole",currUser.getUserRole());
+        model.addAttribute("id",currUser.getUserId());
         return "post_making_form";
     }
 
@@ -325,6 +348,7 @@ public class MainController {
             ra.addFlashAttribute("message", ResponeMessage.authenticateError);
             return "redirect:/";
         }
+        User currUser = userService.loginUser(user);
         List<Post> posts = postService.listPostByUser(id);
         for (Post post : posts) {
             String posterName = (userService.findUserById(post.getPostBy())).getUserName();
@@ -333,6 +357,7 @@ public class MainController {
         // Đưa danh sách bài viết vào model để hiển thị trên post.html
         model.addAttribute("posts", posts);
         model.addAttribute("id", id);
+        model.addAttribute("currUserRole",currUser.getUserRole());
         return "user_post";
     }
 
@@ -343,10 +368,16 @@ public class MainController {
             ra.addFlashAttribute("message", ResponeMessage.authenticateError);
             return "redirect:/";
         }
+
         User currUser = userService.loginUser(user);
+        System.out.println(postId);
+        System.out.println(currUser.getUserId());
         Post post = postService.findPostBySubjectOrId(null,currUser.getUserId(),postId);
+        System.out.println(post);
         model.addAttribute("post", post);
         model.addAttribute("postId", post.getPostId());
+        model.addAttribute("currUserRole",currUser.getUserRole());
+        model.addAttribute("id",currUser.getUserId());
         return "edit_post_form";
     }
 
@@ -370,5 +401,68 @@ public class MainController {
         commentService.updateCommentOfPost(post.getPostContent(),post.getPostId());
         ra.addFlashAttribute("message", ResponeMessage.addPostSuccess);
         return "redirect:/details?id=" + postId;
+    }
+    @GetMapping("delete/details")
+    public String deletePostById(@RequestParam("id") String id,  Model model, HttpSession session, RedirectAttributes ra) throws Exception {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/";
+        }
+        postService.deletePost(Integer.parseInt(id));
+        commentService.deleteByPost(Integer.parseInt(id));
+        return "redirect:/posts?keyword=";
+    }
+    @GetMapping("/admin")
+    public String showListUser(@RequestParam("id") String id,Model model, HttpSession session, RedirectAttributes ra) throws Exception{
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/";
+        }
+        User currUser = userService.loginUser(user);
+        if(!Objects.equals(currUser.getUserRole(),"admin")){
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/user?id=" + id;
+        }
+        List<User> allUser = userService.listAllUser();
+        model.addAttribute("id",id);
+        model.addAttribute("currUserName",currUser.getUserName());
+        model.addAttribute("userList",allUser);
+        return "admin_management";
+    }
+    @GetMapping("/delete/user")
+    public String deleteUser(@RequestParam("id") String id,Model model, HttpSession session, RedirectAttributes ra) throws Exception {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/";
+        }
+        User currUser = userService.loginUser(user);
+        if(!Objects.equals(currUser.getUserRole(),"admin")){
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/user?id=" + id;
+        }
+        userService.deleteUser(id);
+        ra.addFlashAttribute("message",ResponeMessage.deleteUserSuccess);
+        return "redirect:/admin?id=" + currUser.getUserId();
+    }
+    @GetMapping("/reset")
+    public String showResetPassword(Model model) {
+        model.addAttribute("user", new User());
+        return "reset_password_form";
+    }
+
+    @PostMapping("/reset/save")
+    public String resetPassword(User user,  RedirectAttributes ra) throws Exception {
+        String check = userService.resetPassword(user.getUserName(),user.getUserEmail());
+
+        if(check == null){
+            ra.addFlashAttribute("message",ResponeMessage.userNotFound);
+
+        }
+        else{
+        ra.addFlashAttribute("message","Your new password is: " + check);}
+        return "redirect:/";
     }
 }

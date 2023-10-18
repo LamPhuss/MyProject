@@ -24,18 +24,7 @@
         <a class="bar-icon" id="iconBar" onclick="hideIconBar()"><i class="fa fa-bars"></i></a>
         <div class="brand">My Forum</div>
     </div>
-    <!--SearchBox Section-->
-    <div class="search-box">
-        <div>
-            <select name="search-type" id="search-type">
-                <option value="everything">Everything</option>
-                <option value="titles">Titles</option>
-                <option value="descriptions">Descriptions</option>
-            </select>
-            <input type="text" name="q" id="search-input" placeholder="Search ...">
-            <button id="search-button"><i class="fa fa-search"></i></button>
-        </div>
-    </div>
+
 </header>
 <div class="container">
     <div class="navigate">
@@ -91,7 +80,40 @@
 </div>
 </div>
 <script th:inline="javascript">
+    function hideIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:none;");
+        navigation.classList.remove("hide");
+    }
 
+    function showIconBar(){
+        var iconBar = document.getElementById("iconBar");
+        var navigation = document.getElementById("navigation");
+        iconBar.setAttribute("style", "display:block;");
+        navigation.classList.add("hide");
+    }
+    var role = [[${currUserRole}]]; // Điều kiện của bạn ở đây
+    var currId = [[${id}]]
+    if (role === "admin") {
+        // Tạo phần tử <li> mới
+        var li = document.createElement("li");
+        li.className = "nav-item";
+
+        // Tạo thẻ <a> mới
+        var a = document.createElement("a");
+        a.href = "/admin?id=" + currId;
+        a.textContent = "Manage";
+
+        // Gắn thẻ <a> vào thẻ <li>
+        li.appendChild(a);
+
+        // Lấy thẻ <ul> có class "nav-list"
+        var ul = document.querySelector(".nav-list");
+
+        // Gắn thẻ <li> mới vào thẻ <ul>
+        ul.appendChild(li);
+    }
 </script>
 </body>
 </html>

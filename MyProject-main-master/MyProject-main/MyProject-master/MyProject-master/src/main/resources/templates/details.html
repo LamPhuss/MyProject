@@ -48,11 +48,10 @@
         <div class="topic-container">
 
             <!--Original thread-->
-            <div class="head">
+            <div class="head" id="poster-head">
                 <div class="authors">Author</div>
                 <div class="content">Topic details</div>
-                <div><a th:href="@{'/edit/details?id=' + ${postId}}"><button type="submit" class="button--primary button button--icon button--icon--save"><span class="button-text" >Edit</span></button>
-                </a></div>
+
             </div>
             <div class="body">
                 <div class="authors">
@@ -128,15 +127,14 @@
             navigation.classList.add("hide");
         }
         var comments = [[${comments}]];
-
         var commentsPerPage = 10;
-
-
         var segmentedComments = [];
         for (var i = 0; i < comments.length; i += commentsPerPage) {
             segmentedComments.push(comments.slice(i, i + commentsPerPage));
         }
         var commentToId = [[${postId}]];
+        var currUserId = [[${id}]];
+        var poster = [[${poster}]];
         function showComment(replyArea){
 
             var commentArea = document.getElementById(replyArea);
@@ -394,6 +392,49 @@
         }
 
         handleGoButton()
+        var role = [[${currUserRole}]]
+        function showEditor(){
+            if (currUserId === poster.commentBy || role === "admin") {
+                // Tạo một thẻ div
+                var button = document.createElement('button');
+
+                // Thêm các thuộc tính và nội dung vào thẻ button
+                button.setAttribute('type', 'submit');
+                button.setAttribute('class', 'button--primary button button--icon button--icon--save');
+                button.innerHTML = '<span class="button-text">Edit</span>';
+
+                // Thêm sự kiện click cho nút button
+                button.addEventListener('click', function() {
+
+                    var url = '/edit/details?id=' + poster.commentOfPost;
+                    window.location.href = url;
+                });
+
+                // Thêm thẻ button vào một phần tử đã tồn tại trong DOM
+                var container = document.getElementById('poster-head');
+                container.appendChild(button);
+            }
+        }
+        showEditor()
+        if (role === "admin") {
+            // Tạo phần tử <li> mới
+            var li = document.createElement("li");
+            li.className = "nav-item";
+
+            // Tạo thẻ <a> mới
+            var a = document.createElement("a");
+            a.href = "/admin?id=" + currUserId;
+            a.textContent = "Manage";
+
+            // Gắn thẻ <a> vào thẻ <li>
+            li.appendChild(a);
+
+            // Lấy thẻ <ul> có class "nav-list"
+            var ul = document.querySelector(".nav-list");
+
+            // Gắn thẻ <li> mới vào thẻ <ul>
+            ul.appendChild(li);
+        }
     </script>
 
 </body>

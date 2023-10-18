@@ -10,4 +10,5 @@ public interface CommentMapper {
     void insert(Map<String, Object> reqMap) throws Exception;
     List<Comment> getPostDetail(Map<String, Object> reqMap) throws Exception;
     void updateCommentOfPost(Map<String, Object> reqMap) throws Exception;
+    void deleteCommentByPost(Map<String, Object> reqMap) throws Exception;
 }

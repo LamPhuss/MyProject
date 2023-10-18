@@ -85,4 +85,9 @@ public class CommentService {
             throw e;
         }
     }
+    public void deleteByPost(int postId) throws Exception {
+        Map<String,Object> reqMap = new HashMap<>();
+        reqMap.put("commentOfPost",postId);
+        commentMapper.deleteCommentByPost(reqMap);
+    }
 }

@@ -71,7 +71,7 @@ h1{
 }
 
 .subforum-devider{
-    display: none;   
+    display: none;
 }
 
 
@@ -95,9 +95,9 @@ h1{
         background-image: linear-gradient(to right, rgba(190, 190, 190, 0), rgba(255, 255, 255, 0.75), rgba(190, 190, 190, 0));
     }
 
-    
 
-  }
+
+}
 
 /* For the tablets */
 @media screen and (min-width: 460px) and (max-width: 1024px) {
@@ -123,20 +123,20 @@ h1{
         font-size: 16px;
     }
 
-  }
+}
 /*   Header Section    */
 
 header{
     margin-inline: 10px;
 }
-  /* Nav Bar styles */
+/* Nav Bar styles */
 .navbar{
     display:flex;
     align-items: center;
 }
 .navigation{
     background-color:#9a1a11;
-    width: 400px;
+    width: 420px;
     display: inline-block;
     border-radius: 5px;
     max-height: 80px;
@@ -208,11 +208,11 @@ header{
     .navigation{
         max-height: auto;
     }
-    
+
     .close-icon i{
         font-size:30px;
     }
-    
+
     .nav-item a{
         float:left;
         display:inline;
@@ -220,18 +220,18 @@ header{
         font-size: 10px;
         padding: 5px;
     }
-    
-    
+
+
     .bar-icon{
         font-size: 30px;
     }
- 
+
     .brand{
         font-size:20px;
     }
 }
 
-  /* Search Box styles */
+/* Search Box styles */
 .search-box{
     margin-top: 20px;
     padding: 40px;
@@ -265,7 +265,7 @@ header{
     .search-box input, .search-box button, .search-box select{
         min-width: 300px;
         margin-top: 5px;
-    }    
+    }
 
 }
 
@@ -406,7 +406,7 @@ footer{
     background-color: #2C2C2C;
     padding: 5px;
     font-weight: bold;
-    font-size: 15px;
+    font-size: 1.5rem;
 }
 
 .authors{
@@ -594,6 +594,7 @@ select.input, .input.input--select {
     max-width: 100%;
 }
 .button.button--primary, a.button.button--primary {
+    width: 150px;
     color: #fff;
     background: #ec5555;
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.14), 0 2px 2px 0 rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.2);
@@ -656,4 +657,33 @@ textarea {
     font-size: 1.5rem;
     background-color: #ec5555;
     color: #eeeeee;
+}
+.name-container{
+    font-size:20px;
+    flex:20%
+}
+.email-container{
+    flex : 40%
+}
+.password-container{
+    flex :30%
+}
+.button-container{
+    flex :10%
+}
+#manage-add{
+    margin-left: 50px;
+}
+
+.button:hover{
+    background-color: #583232;
+}
+#button-form{
+    margin-left: 40%;
+}
+#reset-password{
+    margin-left: 43%;
+}
+#reset-password-button{
+    width: 200px;
 }

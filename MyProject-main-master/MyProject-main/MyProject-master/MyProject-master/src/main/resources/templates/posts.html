@@ -50,7 +50,13 @@
     <!--starts here-->
     <div id="post-list"></div>
 
-    <div id="pagination"></div>
+    <div class="pagination">
+        <div id="input-container" class="hide" style="margin-bottom: 20px">
+            <label for="page-input">Go to page:</label>
+            <input type="number" id="page-input" min="1" max="${noPage}">
+            <button id="go-button">Go</button>
+        </div>
+    </div>
 </div>
 
 <div class="note">
@@ -151,9 +157,143 @@
             postList.appendChild(postElement);
         });
     }
+    var currKeyword = [[${keyword}]];
+    var totalPages = [[${noPage}]];
+    var paginationContainer = document.querySelector('.pagination');
+    function showPagination(totalPages) {
+        var currPage = [[${currPage}]];
+        if (currPage != 1) {
+            var prevButton2 = document.createElement('a');
+            prevButton2.href = '/posts?keyword=' + currKeyword + '&page=' + (currPage-1);
+            prevButton2.textContent = "Prev";
+            prevButton2.id="prev-button"
+            paginationContainer.appendChild(prevButton2);
+        }
+        if (currPage <= 5) {
+            if (totalPages <= 3) {
+                for (var i = 1; i <= totalPages; i++) {
+                    var link = document.createElement('a');
+                    link.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                    link.textContent = i;
+                    paginationContainer.appendChild(link);
+                }
+            } else {
+                if (currPage + 2 <= totalPages) {
+                    for (var i = 1; i <= currPage + 2; i++) {
+                        var link = document.createElement('a');
+                        link.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                        link.textContent = i;
+                        paginationContainer.appendChild(link);
+                    }
+                } else {
+                    for (var i = 1; i <= totalPages; i++) {
+                        var link = document.createElement('a');
+                        link.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                        link.textContent = i;
+                        paginationContainer.appendChild(link);
+                    }
+                }
+                var dots = document.createElement("a");
+                dots.textContent = "...";
+                dots.classList.add("dots");
+                dots.addEventListener("click", function () {
+                    showPageInput();
+                });
+                paginationContainer.appendChild(dots);
+                var firstLink = document.createElement('a');
+                firstLink.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                firstLink.textContent = totalPages;
+                paginationContainer.appendChild(firstLink);
+            }
+            if (currPage != totalPages) {
+                var nextButton1 = document.createElement('a');
+                nextButton1.href = '/posts?keyword=' + currKeyword + '&page=' + (currPage + 1);
+                nextButton1.textContent = "Next";
+                paginationContainer.appendChild(nextButton1);
+            }
 
+        } else {
+            if (currPage != 1) {
+                var prevButton2 = document.createElement('a');
+                prevButton2.href = '/posts?keyword=' + currKeyword + '&page=' + (currPage-1);
+                prevButton2.textContent = "Prev";
+                prevButton2.id="prev-button"
+                paginationContainer.appendChild(prevButton2);
+            }
+            var firstLink = document.createElement('a');
+            firstLink.href = '/posts?keyword=' + currKeyword + '&page=' + 1;
+            firstLink.textContent = 1;
+            paginationContainer.appendChild(firstLink);
+            var dots = document.createElement("a");
+            dots.textContent = "...";
+            dots.classList.add("dots");
+            dots.addEventListener("click", function() {
+                showPageInput();
+            });
+            paginationContainer.appendChild(dots);
+            if (currPage+2<totalPages){
+                for (var i = currPage-2; i <= currPage + 2; i++) {
+                    var link = document.createElement('a');
+                    link.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                    link.textContent = i;
+                    paginationContainer.appendChild(link);
+                }
+                var dots = document.createElement("a");
+                dots.textContent = "...";
+                dots.classList.add("dots");
+                dots.addEventListener("click", function() {
+                    showPageInput();
+                });
+                paginationContainer.appendChild(dots);
+                var firstLink = document.createElement('a');
+                firstLink.href = '/posts?keyword=' + currKeyword + '&page=' + totalPages;
+                firstLink.textContent = totalPages;
+                paginationContainer.appendChild(firstLink);
+            }
+            else {
+                for (var i = currPage-2; i <= totalPages; i++) {
+                    var link = document.createElement('a');
+                    link.href = '/posts?keyword=' + currKeyword + '&page=' + i;
+                    link.textContent = i;
+                    paginationContainer.appendChild(link);
+                }
+            }
+            if (currPage != totalPages) {
+                var nextButton1 = document.createElement('a');
+                nextButton1.href = '/posts?keyword=' + currKeyword + '&page=' + (currPage + 1);
+                nextButton1.textContent = "Next";
+                paginationContainer.appendChild(nextButton1);
+            }
+        }
+    }
+    function showPageInput() {
+        var paginate = document.getElementById('input-container');
+
+        paginate.classList.toggle("hide");
+    }
+    showPagination(totalPages)
     renderCurrentPage();
-    //renderPagination();
+    var role = [[${currUserRole}]]; // Điều kiện của bạn ở đây
+    var currId = [[${id}]]
+    if (role === "admin") {
+        // Tạo phần tử <li> mới
+        var li = document.createElement("li");
+        li.className = "nav-item";
+
+        // Tạo thẻ <a> mới
+        var a = document.createElement("a");
+        a.href = "/admin?id=" + currId;
+        a.textContent = "Manage";
+
+        // Gắn thẻ <a> vào thẻ <li>
+        li.appendChild(a);
+
+        // Lấy thẻ <ul> có class "nav-list"
+        var ul = document.querySelector(".nav-list");
+
+        // Gắn thẻ <li> mới vào thẻ <ul>
+        ul.appendChild(li);
+    }
 </script>
 </body>
 </html>
