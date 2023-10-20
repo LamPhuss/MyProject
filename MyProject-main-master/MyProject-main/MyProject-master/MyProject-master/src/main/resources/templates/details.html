@@ -56,7 +56,7 @@
             <div class="body">
                 <div class="authors">
                     <div class="username"><a th:href="@{'/user?id=' + ${poster.commentBy}}" th:text="${poster.userCommentByName}"></a></div>
-                    <div>Role</div>
+                    <div th:text="${poster.userCommentRole}"></div>
                     <img src="https://cdn.pixabay.com/photo/2015/11/06/13/27/ninja-1027877_960_720.jpg" alt="" class="limit-size">
                 </div>
                 <div class="content">
@@ -94,8 +94,6 @@
             </div>
         </div>
     </div>
-    </div>
-
     <script th:inline="javascript">
         const searchButton = document.getElementById('search-button');
         const searchInput = document.getElementById('search-input');
@@ -168,7 +166,7 @@
                 usernameDiv.innerHTML = "";  // Xóa nội dung hiện tại của usernameDiv
                 usernameDiv.appendChild(userLink);
                 var roleDiv = document.createElement("div");
-                roleDiv.textContent = "Role";
+                roleDiv.textContent = comment.userCommentRole;
 
                 var imgElement = document.createElement("img");
                 imgElement.src = "https://cdn.pixabay.com/photo/2015/11/06/13/27/ninja-1027877_960_720.jpg";

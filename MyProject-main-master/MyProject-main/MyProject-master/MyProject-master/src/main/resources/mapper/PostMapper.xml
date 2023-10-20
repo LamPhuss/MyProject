@@ -28,6 +28,10 @@
         where post_subject like concat("%", #{keyword},"%")
 
     </select>
+    <select id="listAll" resultMap="post" parameterType="map">
+        select * from posts
+
+    </select>
     <update id="updatePostReplies" parameterType="com.example.myproject.db.Post">
         update posts
         set post_replies = #{postReplies}

@@ -56,7 +56,7 @@
 <div class="note">
     <span><i class="fa fa-pencil-square-o"></i>&nbsp; Create Post</span>&nbsp;&nbsp;&nbsp;<a href="/posts/create"><i class="fa fa-share-square"></i></a><br>
     <span><i class="fa fa-book"></i>&nbsp; View My Posts</span>&nbsp;&nbsp;&nbsp;<a href="#"><i class="fa fa-share-square"></i></a><br>
-
+    <span><i class="fa fa-sign-out"></i>&nbsp; Logout</span>&nbsp;&nbsp;&nbsp;<a th:href="@{/logout}"><i class="fa fa-share-square"></i></a><br>
 </div>
 </div>
 <script th:inline="javascript">
@@ -70,7 +70,7 @@
         const searchKeyword = searchInput.value;
 
 
-        window.location.href = "posts?keyword=" + encodeURIComponent(searchKeyword);
+        window.location.href = "/posts?keyword=" + encodeURIComponent(searchKeyword);
 
         searchInput.value = '';
     }

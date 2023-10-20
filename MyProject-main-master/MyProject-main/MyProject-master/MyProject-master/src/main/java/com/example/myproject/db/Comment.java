@@ -16,4 +16,5 @@ public class Comment {
     private String commentDate;
     private String userCommentToName;
     private String userCommentByName;
+    private String userCommentRole;
 }

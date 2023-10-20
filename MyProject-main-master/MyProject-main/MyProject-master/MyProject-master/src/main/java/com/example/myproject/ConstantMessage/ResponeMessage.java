@@ -13,4 +13,6 @@ public class ResponeMessage {
     public static final String updateUserSuccess = "Update user success";
     public static final String permissionDenial = "You dont have permission to do this";
     public static final String userNotFound = "User not found";
+    public static final String deleteCurrUserSuccess = "Delete your account success, please login again";
+
 }

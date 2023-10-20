@@ -157,7 +157,7 @@ public class MainController {
         }
 
         User currUser = userService.loginUser(user);
-        Comment comment = new Comment(1, id, commentTo, currUser.getUserId(), replyContent, null, null, null);
+        Comment comment = new Comment(1, id, commentTo, currUser.getUserId(), replyContent, null, null, null,null);
         if (commentService.addComment(comment)) {
             List<Comment> comments = commentService.listCommentByPost(id);
             postService.updatePostReplies(id, comments.size() - 1);
@@ -177,14 +177,15 @@ public class MainController {
         List<Comment> comments = commentService.listCommentByPost(Integer.parseInt(cleanedId));
         for (Comment comment : comments) {
             User userCommentToName = (userService.findUserById(comment.getCommentTo()));
-            String userCommentByName = (userService.findUserById(comment.getCommentBy())).getUserName();
+            User userCommentByName = (userService.findUserById(comment.getCommentBy()));
             if (userCommentToName != null) {
                 comment.setUserCommentToName(userCommentToName.getUserName());
-                comment.setUserCommentByName(userCommentByName);
+                comment.setUserCommentByName(userCommentByName.getUserName());
             } else {
                 comment.setUserCommentToName("not reply");
-                comment.setUserCommentByName(userCommentByName);
+                comment.setUserCommentByName(userCommentByName.getUserName());
             }
+            comment.setUserCommentRole(userCommentByName.getUserRole());
 
         }
         model.addAttribute("poster", comments.get(0));
@@ -252,6 +253,7 @@ public class MainController {
         model.addAttribute("defaultMonth", month);
         model.addAttribute("defaultYear", year);
         model.addAttribute("currUserRole",currUser.getUserRole());
+        model.addAttribute("currUserName",currUser.getUserName());
         return "update_user_form";
     }
 
@@ -333,8 +335,9 @@ public class MainController {
             ra.addFlashAttribute("message", ResponeMessage.duplicateSubjectError);
             return "redirect:/posts/create";
         }
-        Post uploadPost = new Post(0, post.getPostSubject(), post.getPostContent(), currUser.getUserId(), null, 0, null);
-        Comment firstComment = new Comment(0, post.getPostId(), "0", currUser.getUserId(), post.getPostContent(), null, null, null);
+        System.out.println(postService.countPost());
+        Post uploadPost = new Post(postService.countPost()+1, post.getPostSubject(), post.getPostContent(), currUser.getUserId(), null, 0, null);
+        Comment firstComment = new Comment(0, postService.countPost()+1, "0", currUser.getUserId(), post.getPostContent(), null, null, null,null);
         postService.addPost(uploadPost);
         commentService.addComment(firstComment);
         ra.addFlashAttribute("message", ResponeMessage.addPostSuccess);
@@ -358,6 +361,7 @@ public class MainController {
         model.addAttribute("posts", posts);
         model.addAttribute("id", id);
         model.addAttribute("currUserRole",currUser.getUserRole());
+        model.addAttribute("currUserName",currUser.getUserName());
         return "user_post";
     }
 
@@ -370,10 +374,7 @@ public class MainController {
         }
 
         User currUser = userService.loginUser(user);
-        System.out.println(postId);
-        System.out.println(currUser.getUserId());
         Post post = postService.findPostBySubjectOrId(null,currUser.getUserId(),postId);
-        System.out.println(post);
         model.addAttribute("post", post);
         model.addAttribute("postId", post.getPostId());
         model.addAttribute("currUserRole",currUser.getUserRole());
@@ -444,6 +445,16 @@ public class MainController {
             return "redirect:/user?id=" + id;
         }
         userService.deleteUser(id);
+        List<Post> userPosts = postService.listPostByUser(id);
+        for (Post post: userPosts){
+            postService.deletePost(post.getPostId());
+            commentService.deleteByPost(post.getPostId());
+        }
+        commentService.deleteByUser(id);
+        if(Objects.equals(currUser.getUserId(),id)){
+            ra.addFlashAttribute("message",ResponeMessage.deleteCurrUserSuccess);
+            return "redirect:/";
+        }
         ra.addFlashAttribute("message",ResponeMessage.deleteUserSuccess);
         return "redirect:/admin?id=" + currUser.getUserId();
     }
@@ -463,6 +474,16 @@ public class MainController {
         }
         else{
         ra.addFlashAttribute("message","Your new password is: " + check);}
+        return "redirect:/";
+    }
+    @GetMapping("/logout")
+    public String logoutUser(HttpSession session, RedirectAttributes ra){
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            ra.addFlashAttribute("message", ResponeMessage.authenticateError);
+            return "redirect:/";
+        }
+        session.invalidate();
         return "redirect:/";
     }
 }

@@ -90,4 +90,9 @@ public class CommentService {
         reqMap.put("commentOfPost",postId);
         commentMapper.deleteCommentByPost(reqMap);
     }
+    public void deleteByUser(String userId) throws Exception {
+        Map<String,Object> reqMap = new HashMap<>();
+        reqMap.put("commentBy",userId);
+        commentMapper.deleteCommentByUser(reqMap);
+    }
 }

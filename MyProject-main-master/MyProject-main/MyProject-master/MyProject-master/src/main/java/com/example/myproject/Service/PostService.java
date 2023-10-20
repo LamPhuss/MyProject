@@ -22,12 +22,15 @@ public class PostService {
         reqMap.put("keyword", keyword);
         return postMapper.listBySubject(reqMap);
     }
+    public int countPost() throws Exception {
+        return (postMapper.listAll()).size();
+    }
     public boolean addPost(Post post) throws Exception {
         String subject = post.getPostSubject();
         String content = post.getPostContent();
         Map<String, Object> reqList= new HashMap<>();
         reqList.put("keyword","");
-        int id = (postMapper.listBySubject(reqList)).size() + 1;
+        int id = post.getPostId();
         String postBy = post.getPostBy();
         int postReplies = post.getPostReplies();
         Map<String, Object> reqMap = new HashMap<>();
@@ -104,4 +107,5 @@ public class PostService {
         reqMap.put("postId",postId);
         postMapper.deletePost(reqMap);
     }
+
 }
